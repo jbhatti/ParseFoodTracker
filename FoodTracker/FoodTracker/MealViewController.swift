@@ -34,7 +34,15 @@ class MealViewController: UIViewController, UITextFieldDelegate, UIImagePickerCo
         if let meal = meal {
             navigationItem.title = meal.name
             nameTextField.text = meal.name
-            photoImageView.image = meal.photo
+            
+            var pfImage = meal["pfFile"] as? PFFile
+            
+            pfImage?.getDataInBackground( { (result, error) in
+                OperationQueue.main.addOperation {
+                    self.photoImageView.image = UIImage(data: result!)
+                }
+            })
+            
             ratingControl.rating = meal.rating
         }
         
@@ -116,7 +124,7 @@ class MealViewController: UIViewController, UITextFieldDelegate, UIImagePickerCo
         
         // Set the meal to be passed to MealTableViewController after the unwind segue.
         
-        meal = Meal(name: name, photo: photo, pfFile: pfFile, rating: rating)
+        meal = Meal(name: name, pfFile: pfFile, rating: rating)
     }
     
     //MARK: Actions
@@ -140,6 +148,8 @@ class MealViewController: UIViewController, UITextFieldDelegate, UIImagePickerCo
     @IBAction func saveButtonTapped(_ sender: UIBarButtonItem) {
         saveMeals()
         print("save button tapped")
+        
+        dismiss(animated: true, completion: nil)
     }
     
     //MARK: Private Methods
@@ -151,30 +161,49 @@ class MealViewController: UIViewController, UITextFieldDelegate, UIImagePickerCo
     }
     
     private func saveMeals() {
-        guard let name = meal?.name,
-            let rating = meal?.rating,
-            let photo = meal?.photo,
-            let pfFile = meal?.pfFile else { return }
-
-        do {
-            guard let image = meal?.photo else { return }
-            guard let data = UIImageJPEGRepresentation(image, 0.8) else { return }
-            //let path = Bundle.main.path(forResource: data, ofType: "jpg")
-            let file = PFFile(data: data)
-            var mealAttributes = Meal(name: name, photo: photo, pfFile: file, rating: rating)
-            
-            mealAttributes?.saveInBackground {
-                (success: Bool, error: Error?) in
-                if success {
-                    print(#line, success)
-                } else {
-                    print(#line, error!)
-                    return
-                }
-            }
-        } catch {
-            print(#line, error.localizedDescription)
-        }
+        
+        
+        
+        
+        
+//        meal.name = nameTextField.text!
+//        meal.rating = ratingControl.rating
+//        meal.pfFile = photoImageView.image
+        let pfFile = PFFile(data: UIImageJPEGRepresentation(photoImageView.image!, 0.8)!)
+//        meal["Photo"] = pfFile
+        let meal = Meal(name: nameTextField.text!, pfFile: pfFile, rating: ratingControl.rating)
+        meals.append(meal!)
+        meal?.saveInBackground()
+        
+        
+        
+//        guard let name = meal?.name,
+//            let rating = meal?.rating,
+//            let photo = meal?.photo,
+//            let pfFile = meal?.pfFile else { return }
+//
+//        do {
+//            guard let image = meal?.photo else { return }
+//            guard let data = UIImageJPEGRepresentation(image, 0.8) else { return }
+//            //let path = Bundle.main.path(forResource: data, ofType: "jpg")
+//            let file = PFFile(data: data)
+//            var mealAttributes = Meal(name: nameTextField.text ?? "",
+//                                      photo: photoImageView.image,
+//                                      pfFile: file, //PFFile(data: UIImageJPEGRepresentation(photoImageView.image!, 0.8)!),
+//                                      rating: ratingControl.rating)
+//
+//            mealAttributes?.saveInBackground {
+//                (success: Bool, error: Error?) in
+//                if success {
+//                    print(#line, success)
+//                } else {
+//                    print(#line, error!)
+//                    return
+//                }
+//            }
+//        } catch {
+//            print(#line, error.localizedDescription)
+//        }
     }
 }
 

@@ -10,25 +10,48 @@ import UIKit
 import os.log
 import Parse
 
+var meals: [Meal] = []
 
 class MealTableViewController: UITableViewController {
     
     //MARK: Properties
     
-    var meals = [Meal]()
+    //var meals: [Meal] = []
+    
+    
+    override func viewWillAppear(_ animated: Bool) {
+        self.tableView.reloadData()
+    }
+    
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        let query = PFQuery(className: "Meal")
         
+        
+        
+        query.findObjectsInBackground { (objectsArray, error) in
+            if error != nil {
+                print(error!)
+            } else if let totalMeal = objectsArray {
+                print(totalMeal.count)
+                
+                meals.append(contentsOf: objectsArray as! [Meal])
+                OperationQueue.main.addOperation {
+                    self.tableView.reloadData()
+                }
+            }
+            
+            
+        }
+        
+
         // Use the edit button item provided by the table view controller.
         navigationItem.leftBarButtonItem = editButtonItem
         
         
     }
     
-    override func viewDidAppear(_ animated: Bool) {
-        loadMeals()
-    }
     
     override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()
@@ -59,8 +82,19 @@ class MealTableViewController: UITableViewController {
         let meal = meals[indexPath.row]
         
         cell.nameLabel.text = meal.name
-        cell.photoImageView.image = meal.photo
+        //cell.photoImageView.image = meal.photo
+        
+        var pfImage = meal["pfFile"] as? PFFile
+        
+        pfImage?.getDataInBackground( { (result, error) in
+            OperationQueue.main.addOperation {
+                cell.photoImageView.image = UIImage(data: result!)
+            }
+        })
+        
         cell.ratingControl.rating = meal.rating
+        
+        
         
         return cell
     }

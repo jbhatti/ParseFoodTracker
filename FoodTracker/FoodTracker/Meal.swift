@@ -34,7 +34,7 @@ class Meal: PFObject {
     
     //MARK: Initialization
     
-    convenience init?(name: String, photo: UIImage?, pfFile: PFFile?, rating: Int) {
+    convenience init?(name: String, pfFile: PFFile?, rating: Int) {
         self.init()
         // The name must not be empty
         guard !name.isEmpty else {
@@ -53,7 +53,6 @@ class Meal: PFObject {
         
         // Initialize stored properties.
         self.name = name
-        self.photo = photo
         self.rating = rating
         self.pfFile = pfFile
         

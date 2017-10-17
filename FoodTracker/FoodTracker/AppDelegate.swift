@@ -18,6 +18,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplicationLaunchOptionsKey: Any]?) -> Bool {
         // Override point for customization after application launch.
+        configureParse()
+        //createObj()
         return true
     }
     
@@ -31,8 +33,11 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         
     }
     
-    
-    
+    private func createObj() {
+    let testObj = PFObject(className: "testObj")
+    testObj["foo"] = "bar"
+    testObj.saveInBackground()
+    }
     
     
 }
