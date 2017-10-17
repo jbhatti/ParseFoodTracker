@@ -8,6 +8,7 @@
 
 import UIKit
 import os.log
+import Parse
 
 class MealViewController: UIViewController, UITextFieldDelegate, UIImagePickerControllerDelegate, UINavigationControllerDelegate {
     
@@ -107,12 +108,15 @@ class MealViewController: UIViewController, UITextFieldDelegate, UIImagePickerCo
             return
         }
         
+        
         let name = nameTextField.text ?? ""
         let photo = photoImageView.image
+        let pfFile = PFFile(data: UIImageJPEGRepresentation(photoImageView.image!, 0.8)!)
         let rating = ratingControl.rating
         
         // Set the meal to be passed to MealTableViewController after the unwind segue.
-        meal = Meal(name: name, photo: photo, rating: rating)
+        
+        meal = Meal(name: name, photo: photo, pfFile: pfFile, rating: rating)
     }
     
     //MARK: Actions
@@ -132,6 +136,11 @@ class MealViewController: UIViewController, UITextFieldDelegate, UIImagePickerCo
         present(imagePickerController, animated: true, completion: nil)
     }
     
+    
+    @IBAction func saveButtonTapped(_ sender: UIBarButtonItem) {
+        saveMeals()
+    }
+    
     //MARK: Private Methods
     
     private func updateSaveButtonState() {
@@ -140,5 +149,31 @@ class MealViewController: UIViewController, UITextFieldDelegate, UIImagePickerCo
         saveButton.isEnabled = !text.isEmpty
     }
     
+    private func saveMeals() {
+        guard let name = meal?.name,
+            let rating = meal?.rating,
+            let photo = meal?.photo,
+            let pfFile = meal?.pfFile else { return }
+
+        do {
+            guard let image = meal?.photo else { return }
+            guard let data = UIImageJPEGRepresentation(image, 0.8) else { return }
+            //let path = Bundle.main.path(forResource: data, ofType: "jpg")
+            let file = PFFile(data: data)
+            var mealAttributes = Meal(name: name, photo: photo, pfFile: file, rating: rating)
+            
+            mealAttributes?.saveInBackground {
+                (success: Bool, error: Error?) in
+                if success {
+                    print(#line, success)
+                } else {
+                    print(#line, error!)
+                    return
+                }
+            }
+        } catch {
+            print(#line, error.localizedDescription)
+        }
+    }
 }
 
