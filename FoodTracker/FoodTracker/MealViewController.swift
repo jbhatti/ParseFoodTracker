@@ -139,6 +139,7 @@ class MealViewController: UIViewController, UITextFieldDelegate, UIImagePickerCo
     
     @IBAction func saveButtonTapped(_ sender: UIBarButtonItem) {
         saveMeals()
+        print("save button tapped")
     }
     
     //MARK: Private Methods
